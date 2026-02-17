@@ -1,0 +1,1398 @@
+{
+ "cells": [
+  {
+   "cell_type": "markdown",
+   "id": "13d704b2",
+   "metadata": {
+    "papermill": {
+     "duration": 0.006942,
+     "end_time": "2026-02-17T19:23:11.380906",
+     "exception": false,
+     "start_time": "2026-02-17T19:23:11.373964",
+     "status": "completed"
+    },
+    "tags": []
+   },
+   "source": [
+    "# 1. Executive Summary\n",
+    "This analysis uses ranking system to calculate revenue distribution and general performance on different sections.\n",
+    "The findings indicate that revenue is well distributed among countries, with the top-performer showing 18.6% share of total revenue, suggesting no overdependency on a single country to carry on the whole operation.\n",
+    "The same applies for products, no outlier detected with all products contributing considerably to total revenue. Although the top-performer has a gap of $30 million to the last one, the two highest on revenue summed only incorporate 11% of total revenue. It indicates moderate balance with few adjustements in order to increase specific products participation, no radical interference needed.\n",
+    "Sales representative performance present similar result, but with negative outliers. The two top-performers have incredible numbers, but are followed close by their colleagues. Some show rather ability in handling high-end products, and others on large volume. Talents to polish overtime and expect great contributions to the operation."
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "b35161f8",
+   "metadata": {
+    "papermill": {
+     "duration": 0.00573,
+     "end_time": "2026-02-17T19:23:11.392569",
+     "exception": false,
+     "start_time": "2026-02-17T19:23:11.386839",
+     "status": "completed"
+    },
+    "tags": []
+   },
+   "source": [
+    "# 2. Business Overview\n",
+    "The objective of this analysis is to evaluate the overall performance of a chocolate sales operation. It focuses on identifying revenue contributions across countries, products, and sales representatives, as well as assessing revenue distribution, trend periods, personal-level performance, and future market opportunities.\n",
+    "* Check if there's a overly dependency on a group or individual country, product, or sales representative.\n",
+    "* Looks out for new opportunities such as sales representative dealing well with high-end products but low volume, country with huge volume but low average price per transaction.\n",
+    "* Support strategic by using data to create information, thus mitigating risks and data-basing key decisions for future operations and expansions.\n",
+    "\n",
+    "With this understanding, board and stakeholders can determine current company health and whether change or not long-term plans."
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "33a50ee9",
+   "metadata": {
+    "papermill": {
+     "duration": 0.006133,
+     "end_time": "2026-02-17T19:23:11.404378",
+     "exception": false,
+     "start_time": "2026-02-17T19:23:11.398245",
+     "status": "completed"
+    },
+    "tags": []
+   },
+   "source": [
+    "# 3. Dataset Overview\n",
+    "The dataset contains 3282 transactional records spanning from 03/01/2022 to 31/08/2024 (not including months: 09, 10, 11, 12), covering 6 countries, 25 sales representatives, and 22 products.\n",
+    "- Source: Kaggle Datasets\n",
+    "- Rows: 3283\n",
+    "- Columns:\n",
+    "    - Date - Transaction date (DD/MM/YYYY Format)\n",
+    "    - Product - Full product name\n",
+    "    - Amount - Sales amount\n",
+    "    - Boxes - Quantity of boxes in each transaction\n",
+    "    - Country  - Customer’s country\n",
+    "    - Sales Person - name of the sales representative"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "0219bbf1",
+   "metadata": {
+    "papermill": {
+     "duration": 0.005688,
+     "end_time": "2026-02-17T19:23:11.416653",
+     "exception": false,
+     "start_time": "2026-02-17T19:23:11.410965",
+     "status": "completed"
+    },
+    "tags": []
+   },
+   "source": [
+    "# 4. Data Preparation and Cleaning\n",
+    "Creating the environment and loading key libraries (Pandas and Numpy)."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 1,
+   "id": "5ed6bf95",
+   "metadata": {
+    "_cell_guid": "b1076dfc-b9ad-4769-8c92-a6c4dae69d19",
+    "_uuid": "8f2839f25d086af736a60e9eeb907d3b93b6e0e5",
+    "execution": {
+     "iopub.execute_input": "2026-02-17T19:23:11.429907Z",
+     "iopub.status.busy": "2026-02-17T19:23:11.429539Z",
+     "iopub.status.idle": "2026-02-17T19:23:12.600072Z",
+     "shell.execute_reply": "2026-02-17T19:23:12.598940Z"
+    },
+    "papermill": {
+     "duration": 1.180463,
+     "end_time": "2026-02-17T19:23:12.602815",
+     "exception": false,
+     "start_time": "2026-02-17T19:23:11.422352",
+     "status": "completed"
+    },
+    "tags": []
+   },
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "/kaggle/input/datasets/josgomespinheironeto/chocolate-sales-new/Chocolate Sales (2) new.csv\n",
+      "/kaggle/input/chocolate-sales/ChocolateSales.pbix\n",
+      "/kaggle/input/chocolate-sales/Chocolate Sales (2).csv\n",
+      "/kaggle/input/chocolate-sales/ChocolateSales.pdf\n",
+      "/kaggle/input/chocolate-sales/ChocolateSales.pbit\n",
+      "Sucessful load\n"
+     ]
+    }
+   ],
+   "source": [
+    "# This Python 3 environment comes with many helpful analytics libraries installed\n",
+    "# It is defined by the kaggle/python Docker image: https://github.com/kaggle/docker-python\n",
+    "# For example, here's several helpful packages to load\n",
+    "\n",
+    "import numpy as np # linear algebra\n",
+    "import pandas as pd # data processing, CSV file I/O (e.g. pd.read_csv)\n",
+    "\n",
+    "# Input data files are available in the read-only \"../input/\" directory\n",
+    "# For example, running this (by clicking run or pressing Shift+Enter) will list all files under the input directory\n",
+    "\n",
+    "import os\n",
+    "for dirname, _, filenames in os.walk('/kaggle/input'):\n",
+    "    for filename in filenames:\n",
+    "        print(os.path.join(dirname, filename))\n",
+    "\n",
+    "# You can write up to 20GB to the current directory (/kaggle/working/) that gets preserved as output when you create a version using \"Save & Run All\" \n",
+    "# You can also write temporary files to /kaggle/temp/, but they won't be saved outside of the current session\n",
+    "print('Sucessful load')"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "8267af60",
+   "metadata": {
+    "papermill": {
+     "duration": 0.005988,
+     "end_time": "2026-02-17T19:23:12.615017",
+     "exception": false,
+     "start_time": "2026-02-17T19:23:12.609029",
+     "status": "completed"
+    },
+    "tags": []
+   },
+   "source": [
+    "## 4.1 - Data Inspection\n",
+    "Initial inspection was conducted using Microsoft Excel to visually assess the dataset structure and identify potential data quality issues such as formatting inconsistencies, missing values, and duplicate records. First task was to properly format the data since it's a CSV file and opens on Excel with all data glued on the first column. For this, I used the Import Text Wizard, tool responsible for reading data in other formats, including `.csv`, and transforming it to Excel formats, as `.xls` or `.xlsx`.\n",
+    "\n",
+    "* Column `Sales Person` has data type of string/text.\n",
+    "* Column `Country` has data type of string/text.\n",
+    "* Column `Product` has data type of string/text.\n",
+    "* Column `Date` has data type of string/text. Necessary change to datetime data type.\n",
+    "* Column `Amount` has data type of string/text. Necessary change to integer data type.\n",
+    "* Column `Boxes Shipped` has data type of integer.\n",
+    "\n",
+    "No missing values, spelling errors, or duplicated values found in a preliminary Excel analysis."
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "4dd3e344",
+   "metadata": {
+    "papermill": {
+     "duration": 0.00584,
+     "end_time": "2026-02-17T19:23:12.626743",
+     "exception": false,
+     "start_time": "2026-02-17T19:23:12.620903",
+     "status": "completed"
+    },
+    "tags": []
+   },
+   "source": [
+    "## 4.2 - Data Validation\n",
+    "Although the dataset size allowed a manual inspection, programmatic validation via Pandas was conducted to ensure data quality and analysis reliability."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 2,
+   "id": "bd382c26",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2026-02-17T19:23:12.641070Z",
+     "iopub.status.busy": "2026-02-17T19:23:12.639936Z",
+     "iopub.status.idle": "2026-02-17T19:23:12.749122Z",
+     "shell.execute_reply": "2026-02-17T19:23:12.748256Z"
+    },
+    "papermill": {
+     "duration": 0.118383,
+     "end_time": "2026-02-17T19:23:12.751086",
+     "exception": false,
+     "start_time": "2026-02-17T19:23:12.632703",
+     "status": "completed"
+    },
+    "tags": []
+   },
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "<class 'pandas.core.frame.DataFrame'>\n",
+      "RangeIndex: 3282 entries, 0 to 3281\n",
+      "Data columns (total 6 columns):\n",
+      " #   Column         Non-Null Count  Dtype \n",
+      "---  ------         --------------  ----- \n",
+      " 0   Sales Person   3282 non-null   object\n",
+      " 1   Country        3282 non-null   object\n",
+      " 2   Product        3282 non-null   object\n",
+      " 3   Date           3282 non-null   object\n",
+      " 4   Amount         3282 non-null   object\n",
+      " 5   Boxes Shipped  3282 non-null   int64 \n",
+      "dtypes: int64(1), object(5)\n",
+      "memory usage: 154.0+ KB\n"
+     ]
+    },
+    {
+     "data": {
+      "text/html": [
+       "<div>\n",
+       "<style scoped>\n",
+       "    .dataframe tbody tr th:only-of-type {\n",
+       "        vertical-align: middle;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe tbody tr th {\n",
+       "        vertical-align: top;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe thead th {\n",
+       "        text-align: right;\n",
+       "    }\n",
+       "</style>\n",
+       "<table border=\"1\" class=\"dataframe\">\n",
+       "  <thead>\n",
+       "    <tr style=\"text-align: right;\">\n",
+       "      <th></th>\n",
+       "      <th>Boxes Shipped</th>\n",
+       "    </tr>\n",
+       "  </thead>\n",
+       "  <tbody>\n",
+       "    <tr>\n",
+       "      <th>count</th>\n",
+       "      <td>3282.000000</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>mean</th>\n",
+       "      <td>164.666971</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>std</th>\n",
+       "      <td>124.024736</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>min</th>\n",
+       "      <td>1.000000</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>25%</th>\n",
+       "      <td>71.000000</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>50%</th>\n",
+       "      <td>137.000000</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>75%</th>\n",
+       "      <td>232.000000</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>max</th>\n",
+       "      <td>778.000000</td>\n",
+       "    </tr>\n",
+       "  </tbody>\n",
+       "</table>\n",
+       "</div>"
+      ],
+      "text/plain": [
+       "       Boxes Shipped\n",
+       "count    3282.000000\n",
+       "mean      164.666971\n",
+       "std       124.024736\n",
+       "min         1.000000\n",
+       "25%        71.000000\n",
+       "50%       137.000000\n",
+       "75%       232.000000\n",
+       "max       778.000000"
+      ]
+     },
+     "execution_count": 2,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "# Load dataset\n",
+    "db = pd.read_csv('/kaggle/input/chocolate-sales/Chocolate Sales (2).csv')\n",
+    "\n",
+    "#Dataset overview\n",
+    "db.info()\n",
+    "\n",
+    "#Check for duplicated values\n",
+    "db.duplicated().sum()\n",
+    "\n",
+    "#Check for null values\n",
+    "db.isnull().sum()\n",
+    "\n",
+    "# Validate numeric columns\n",
+    "db[['Amount', 'Boxes Shipped']].describe()"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "54cccb4c",
+   "metadata": {
+    "papermill": {
+     "duration": 0.006304,
+     "end_time": "2026-02-17T19:23:12.763675",
+     "exception": false,
+     "start_time": "2026-02-17T19:23:12.757371",
+     "status": "completed"
+    },
+    "tags": []
+   },
+   "source": [
+    "All records were successfully validated, with no missing values or structural inconsistencies detected. This adds an extra security layer before proceeding to data transformation and KPIs."
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "2a739f8a",
+   "metadata": {
+    "papermill": {
+     "duration": 0.005881,
+     "end_time": "2026-02-17T19:23:12.775574",
+     "exception": false,
+     "start_time": "2026-02-17T19:23:12.769693",
+     "status": "completed"
+    },
+    "tags": []
+   },
+   "source": [
+    "## 4.3 - Transformations"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "e8acc825",
+   "metadata": {
+    "papermill": {
+     "duration": 0.005835,
+     "end_time": "2026-02-17T19:23:12.787437",
+     "exception": false,
+     "start_time": "2026-02-17T19:23:12.781602",
+     "status": "completed"
+    },
+    "tags": []
+   },
+   "source": [
+    "### 4.3.1 Date Standardization\n",
+    "The `Date` column will be converted to datetime format to enable time-based aggregation and chronological analysis. This transformation allows fully use of datetime specification such as extract specific month, day, or year, and prevent string-base errors."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 3,
+   "id": "043c8966",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2026-02-17T19:23:12.802095Z",
+     "iopub.status.busy": "2026-02-17T19:23:12.801766Z",
+     "iopub.status.idle": "2026-02-17T19:23:12.813531Z",
+     "shell.execute_reply": "2026-02-17T19:23:12.812548Z"
+    },
+    "papermill": {
+     "duration": 0.022071,
+     "end_time": "2026-02-17T19:23:12.815554",
+     "exception": false,
+     "start_time": "2026-02-17T19:23:12.793483",
+     "status": "completed"
+    },
+    "tags": []
+   },
+   "outputs": [],
+   "source": [
+    "# Update column with new data type\n",
+    "db['Date'] = pd.to_datetime(db['Date'], dayfirst=True)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "8ff2d537",
+   "metadata": {
+    "papermill": {
+     "duration": 0.006456,
+     "end_time": "2026-02-17T19:23:12.828543",
+     "exception": false,
+     "start_time": "2026-02-17T19:23:12.822087",
+     "status": "completed"
+    },
+    "tags": []
+   },
+   "source": [
+    "### 4.3.2 Amount Numeric Transformation\n",
+    "The `Amount` column data type will be transformed from object(string) to int64(integer). This transformation is going to allow aggregation, KPI computation, and descriptive statistics without casting errors."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 4,
+   "id": "390e4ce6",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2026-02-17T19:23:12.844125Z",
+     "iopub.status.busy": "2026-02-17T19:23:12.843806Z",
+     "iopub.status.idle": "2026-02-17T19:23:12.853295Z",
+     "shell.execute_reply": "2026-02-17T19:23:12.852294Z"
+    },
+    "papermill": {
+     "duration": 0.020373,
+     "end_time": "2026-02-17T19:23:12.855572",
+     "exception": false,
+     "start_time": "2026-02-17T19:23:12.835199",
+     "status": "completed"
+    },
+    "tags": []
+   },
+   "outputs": [],
+   "source": [
+    "#Remove non-numeric character from Amount to change it from str to int\n",
+    "def remove(cell):\n",
+    "    return cell.replace('$', '').replace(',', '')\n",
+    "\n",
+    "# Turn into numeric\n",
+    "db['Amount'] = pd.to_numeric(db['Amount'].map(remove))"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "65e76d0d",
+   "metadata": {
+    "papermill": {
+     "duration": 0.006283,
+     "end_time": "2026-02-17T19:23:12.868160",
+     "exception": false,
+     "start_time": "2026-02-17T19:23:12.861877",
+     "status": "completed"
+    },
+    "tags": []
+   },
+   "source": [
+    "### 4.3.3 Calculated Metrics\n",
+    "A derived metric, Revenue per Box, was calculated to assess pricing consistency and operational efficiency across products, countries, and sales representatives. Its creation enables deeper performance evaluation."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 5,
+   "id": "980880dd",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2026-02-17T19:23:12.882064Z",
+     "iopub.status.busy": "2026-02-17T19:23:12.881691Z",
+     "iopub.status.idle": "2026-02-17T19:23:12.916653Z",
+     "shell.execute_reply": "2026-02-17T19:23:12.915514Z"
+    },
+    "papermill": {
+     "duration": 0.04435,
+     "end_time": "2026-02-17T19:23:12.918727",
+     "exception": false,
+     "start_time": "2026-02-17T19:23:12.874377",
+     "status": "completed"
+    },
+    "tags": []
+   },
+   "outputs": [],
+   "source": [
+    "# Function to calculate revenue per box\n",
+    "def calculate(row):\n",
+    "    return row['Amount'] / row['Boxes Shipped']\n",
+    "\n",
+    "# Read every row and store new Series\n",
+    "new_column = db.apply(calculate, axis='columns')\n",
+    "\n",
+    "# Round and assign it\n",
+    "db['Revenue per Box'] = new_column.round(0)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "6f8e1453",
+   "metadata": {
+    "papermill": {
+     "duration": 0.006061,
+     "end_time": "2026-02-17T19:23:12.931121",
+     "exception": false,
+     "start_time": "2026-02-17T19:23:12.925060",
+     "status": "completed"
+    },
+    "tags": []
+   },
+   "source": [
+    "### 4.3.4 Creation of Time-Based Feature\n",
+    "This additional column will be derived from the Date column to support aggregated performance analysis and trend evaluation. It allows deeper analysis without interfering with raw and primordial data, such as `Date` column."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 6,
+   "id": "2e19acfb",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2026-02-17T19:23:12.945896Z",
+     "iopub.status.busy": "2026-02-17T19:23:12.945557Z",
+     "iopub.status.idle": "2026-02-17T19:23:12.976973Z",
+     "shell.execute_reply": "2026-02-17T19:23:12.975831Z"
+    },
+    "papermill": {
+     "duration": 0.041916,
+     "end_time": "2026-02-17T19:23:12.979117",
+     "exception": false,
+     "start_time": "2026-02-17T19:23:12.937201",
+     "status": "completed"
+    },
+    "tags": []
+   },
+   "outputs": [],
+   "source": [
+    "# Extract each transacation month and assign to a new column\n",
+    "db['Month'] = db['Date'].dt.month\n",
+    "db.to_csv('choco_sales.csv', index=False)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "1ad3f7e0",
+   "metadata": {
+    "papermill": {
+     "duration": 0.006531,
+     "end_time": "2026-02-17T19:23:12.992014",
+     "exception": false,
+     "start_time": "2026-02-17T19:23:12.985483",
+     "status": "completed"
+    },
+    "tags": []
+   },
+   "source": [
+    "# 5. Key Performance Indicators (KPIs)\n",
+    "In this section, we're going turn data into information by using SQL queries. "
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "510e0172",
+   "metadata": {
+    "papermill": {
+     "duration": 0.006079,
+     "end_time": "2026-02-17T19:23:13.004288",
+     "exception": false,
+     "start_time": "2026-02-17T19:23:12.998209",
+     "status": "completed"
+    },
+    "tags": []
+   },
+   "source": [
+    "## 5.1 Total Revenue\n",
+    "Total revenue represents the overall sales performance of the company across all countries, products, and sales representatives."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 7,
+   "id": "803a72d1",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2026-02-17T19:23:13.018123Z",
+     "iopub.status.busy": "2026-02-17T19:23:13.017815Z",
+     "iopub.status.idle": "2026-02-17T19:23:13.022712Z",
+     "shell.execute_reply": "2026-02-17T19:23:13.021519Z"
+    },
+    "papermill": {
+     "duration": 0.01444,
+     "end_time": "2026-02-17T19:23:13.024805",
+     "exception": false,
+     "start_time": "2026-02-17T19:23:13.010365",
+     "status": "completed"
+    },
+    "tags": []
+   },
+   "outputs": [],
+   "source": [
+    "query = \"\"\"SELECT SUM(Amount) AS Total_Revenue\n",
+    "            FROM choco_sales;\n",
+    "        \"\"\""
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "543f231c",
+   "metadata": {
+    "papermill": {
+     "duration": 0.006147,
+     "end_time": "2026-02-17T19:23:13.037306",
+     "exception": false,
+     "start_time": "2026-02-17T19:23:13.031159",
+     "status": "completed"
+    },
+    "tags": []
+   },
+   "source": [
+    "| Total_Revenue |\n",
+    "| --- |\n",
+    "| 1303402410 |\n"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "148ed162",
+   "metadata": {
+    "papermill": {
+     "duration": 0.005979,
+     "end_time": "2026-02-17T19:23:13.049416",
+     "exception": false,
+     "start_time": "2026-02-17T19:23:13.043437",
+     "status": "completed"
+    },
+    "tags": []
+   },
+   "source": [
+    "Total revenue serves as the primary performance indicator and estabilishes a baseline for all future comparisons and inferences.\n",
+    "\n",
+    "This dataset contains 3282 transactions generating a total revenue of $1,303,402,410 Dollars."
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "d0dda122",
+   "metadata": {
+    "papermill": {
+     "duration": 0.006015,
+     "end_time": "2026-02-17T19:23:13.061600",
+     "exception": false,
+     "start_time": "2026-02-17T19:23:13.055585",
+     "status": "completed"
+    },
+    "tags": []
+   },
+   "source": [
+    "## 5.2 Revenue by Country\n",
+    "Revenue aggregated by country measures geographic market performance."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 8,
+   "id": "40a5e4a8",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2026-02-17T19:23:13.075462Z",
+     "iopub.status.busy": "2026-02-17T19:23:13.075046Z",
+     "iopub.status.idle": "2026-02-17T19:23:13.079420Z",
+     "shell.execute_reply": "2026-02-17T19:23:13.078564Z"
+    },
+    "papermill": {
+     "duration": 0.013422,
+     "end_time": "2026-02-17T19:23:13.081164",
+     "exception": false,
+     "start_time": "2026-02-17T19:23:13.067742",
+     "status": "completed"
+    },
+    "tags": []
+   },
+   "outputs": [],
+   "source": [
+    "query = \"\"\"SELECT country, SUM(\"Boxes Shipped\") AS Total_boxes, SUM(Amount) AS Revenue_per_Country,\n",
+    "           SUM(Amount)/SUM(\"Boxes Shipped\") AS Avg_price_per_box\n",
+    "           FROM choco_sales\n",
+    "           GROUP BY country\n",
+    "\t\t   ORDER BY Revenue_per_Country DESC, Avg_price_per_box DESC;\n",
+    "        \"\"\""
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "c5f63b2d",
+   "metadata": {
+    "papermill": {
+     "duration": 0.006128,
+     "end_time": "2026-02-17T19:23:13.093516",
+     "exception": false,
+     "start_time": "2026-02-17T19:23:13.087388",
+     "status": "completed"
+    },
+    "tags": []
+   },
+   "source": [
+    "| Country      | Total_boxes | Revenue_per_Country | Avg_price_per_box |\n",
+    "|-------------|------------|--------------------|-------------------|\n",
+    "| Australia   | 99618      | 243278733          | 2442              |\n",
+    "| USA         | 81820      | 220385614          | 2693              |\n",
+    "| UK          | 92523      | 219184578          | 2368              |\n",
+    "| India       | 89968      | 216005965          | 2400              |\n",
+    "| Canada      | 95158      | 206129450          | 2166              |\n",
+    "| New Zealand | 81350      | 198418070          | 2439              |"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "11333e2f",
+   "metadata": {
+    "papermill": {
+     "duration": 0.006643,
+     "end_time": "2026-02-17T19:23:13.106342",
+     "exception": false,
+     "start_time": "2026-02-17T19:23:13.099699",
+     "status": "completed"
+    },
+    "tags": []
+   },
+   "source": [
+    "This KPI identifies high-performant market and areas with potential growth for either high-end or volume-based products.\n",
+    "\n",
+    "The top contributor present a market share of approxiamtely 19%. Despite the significative amount, the overall balance is well maintained with no outliers."
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "a81c422d",
+   "metadata": {
+    "papermill": {
+     "duration": 0.006166,
+     "end_time": "2026-02-17T19:23:13.118806",
+     "exception": false,
+     "start_time": "2026-02-17T19:23:13.112640",
+     "status": "completed"
+    },
+    "tags": []
+   },
+   "source": [
+    "## 5.3 Revenue by Sales Representative\n",
+    "Revenue contribution by individual sales representatives."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 9,
+   "id": "26908e4f",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2026-02-17T19:23:13.132893Z",
+     "iopub.status.busy": "2026-02-17T19:23:13.132561Z",
+     "iopub.status.idle": "2026-02-17T19:23:13.137060Z",
+     "shell.execute_reply": "2026-02-17T19:23:13.136017Z"
+    },
+    "papermill": {
+     "duration": 0.014419,
+     "end_time": "2026-02-17T19:23:13.139448",
+     "exception": false,
+     "start_time": "2026-02-17T19:23:13.125029",
+     "status": "completed"
+    },
+    "tags": []
+   },
+   "outputs": [],
+   "source": [
+    "query = \"\"\"SELECT \"Sales Person\", SUM(Amount) AS Revenue_per_Sales_Person, SUM(\"Boxes Shipped\") AS Total_boxes,\n",
+    "           SUM(Amount)/SUM(\"Boxes Shipped\") AS Avg_price_per_box\n",
+    "           FROM choco_sales\n",
+    "           GROUP BY \"Sales Person\"\n",
+    "\t\t   ORDER BY Revenue_per_Sales_Person DESC, Avg_price_per_box DESC;\n",
+    "        \"\"\""
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "a041cb74",
+   "metadata": {
+    "papermill": {
+     "duration": 0.006507,
+     "end_time": "2026-02-17T19:23:13.152310",
+     "exception": false,
+     "start_time": "2026-02-17T19:23:13.145803",
+     "status": "completed"
+    },
+    "tags": []
+   },
+   "source": [
+    "| Sales Person           | Revenue_per_Sales_Person | Total_boxes | Avg_price_per_box |\n",
+    "|------------------------|--------------------------|------------|-------------------|\n",
+    "| Kelci Walkden          | 69371340                 | 26605      | 2607              |\n",
+    "| Brien Boise            | 69289878                 | 24738      | 2800              |\n",
+    "| Madelene Upcott        | 68195064                 | 22199      | 3071              |\n",
+    "| Ches Bonnell           | 66934753                 | 23070      | 2901              |\n",
+    "| Van Tuxwell            | 66078076                 | 20627      | 3203              |\n",
+    "| Oby Sorrel             | 65921004                 | 26390      | 2497              |\n",
+    "| Dennison Crosswaite    | 62715934                 | 26862      | 2334              |\n",
+    "| Beverie Moffet         | 59928174                 | 28027      | 2138              |\n",
+    "| Barr Faughny           | 57552319                 | 19520      | 2948              |\n",
+    "| Marney O'Breen         | 57130545                 | 24595      | 2322              |\n",
+    "| Roddy Speechley        | 51456808                 | 21130      | 2435              |\n",
+    "| Kaine Padly            | 51045612                 | 22134      | 2306              |\n",
+    "| Gunar Cockshoot        | 50690897                 | 20299      | 2497              |\n",
+    "| Curtice Advani         | 46968737                 | 21599      | 2174              |\n",
+    "| Jan Morforth           | 46798479                 | 23360      | 2003              |\n",
+    "| Karlen McCaffrey       | 46553830                 | 29553      | 1575              |\n",
+    "| Jehu Rudeforth         | 45904105                 | 22104      | 2076              |\n",
+    "| Gigi Bohling           | 44200152                 | 19237      | 2297              |\n",
+    "| Mallorie Waber         | 43479543                 | 18219      | 2386              |\n",
+    "| Andria Kimpton         | 42899488                 | 19730      | 2174              |\n",
+    "| Camilla Castle         | 42426831                 | 16505      | 2570              |\n",
+    "| Dotty Strutley         | 40790499                 | 20927      | 1949              |\n",
+    "| Husein Augar           | 40274267                 | 17683      | 2277              |\n",
+    "| Rafaelita Blaksland    | 37767585                 | 13091      | 2885              |\n",
+    "| Wilone O'Kielt         | 29028490                 | 12233      | 2372              |\n"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "08c394c0",
+   "metadata": {
+    "papermill": {
+     "duration": 0.006559,
+     "end_time": "2026-02-17T19:23:13.165051",
+     "exception": false,
+     "start_time": "2026-02-17T19:23:13.158492",
+     "status": "completed"
+    },
+    "tags": []
+   },
+   "source": [
+    "Measures individual performance, contribution to total revenue, and potential talents for specific groups of products.\n",
+    "\n",
+    "The two top-performing sales representatives accounts for 11% of total revenue. The approximate $30 million gap between highest and lowest in revenue, shows an outlier for the last-placed sales representative. Despite that, this difference is noticeable for the last from the second-to-last performers, other positions have no such gap and follows a smooth decrescent order."
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "11aa09e5",
+   "metadata": {
+    "papermill": {
+     "duration": 0.006195,
+     "end_time": "2026-02-17T19:23:13.178129",
+     "exception": false,
+     "start_time": "2026-02-17T19:23:13.171934",
+     "status": "completed"
+    },
+    "tags": []
+   },
+   "source": [
+    "## 5.4 Revenue by Product\n",
+    "Revenue contribution by individual products."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 10,
+   "id": "d487aaf5",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2026-02-17T19:23:13.192337Z",
+     "iopub.status.busy": "2026-02-17T19:23:13.191959Z",
+     "iopub.status.idle": "2026-02-17T19:23:13.196419Z",
+     "shell.execute_reply": "2026-02-17T19:23:13.195533Z"
+    },
+    "papermill": {
+     "duration": 0.013899,
+     "end_time": "2026-02-17T19:23:13.198294",
+     "exception": false,
+     "start_time": "2026-02-17T19:23:13.184395",
+     "status": "completed"
+    },
+    "tags": []
+   },
+   "outputs": [],
+   "source": [
+    "query = \"\"\"SELECT Product, SUM(\"Boxes Shipped\") AS Total_boxes, SUM(Amount) AS Revenue_per_Product,\n",
+    "           SUM(Amount)/SUM(\"Boxes Shipped\") AS Avg_price_per_box\n",
+    "           FROM choco_sales\n",
+    "           GROUP BY Product\n",
+    "\t\t   ORDER BY Revenue_per_Product DESC, Avg_price_per_box DESC;\n",
+    "        \"\"\""
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "c56ac098",
+   "metadata": {
+    "papermill": {
+     "duration": 0.00673,
+     "end_time": "2026-02-17T19:23:13.211660",
+     "exception": false,
+     "start_time": "2026-02-17T19:23:13.204930",
+     "status": "completed"
+    },
+    "tags": []
+   },
+   "source": [
+    "| Product                 | Total_boxes | Revenue_per_Product | Avg_price_per_box |\n",
+    "|--------------------------|------------|---------------------|-------------------|\n",
+    "| Smooth Sliky Salty       | 26969      | 73619017            | 2729              |\n",
+    "| 50% Dark Bites           | 29810      | 72837584            | 2443              |\n",
+    "| Peanut Butter Cubes      | 25339      | 69795637            | 2754              |\n",
+    "| White Choc               | 25158      | 67353846            | 2677              |\n",
+    "| Eclairs                  | 26678      | 65928209            | 2471              |\n",
+    "| 85% Dark Bars            | 23828      | 62972528            | 2642              |\n",
+    "| Organic Choco Syrup      | 23602      | 61259575            | 2595              |\n",
+    "| Spicy Special Slims      | 26662      | 61047436            | 2289              |\n",
+    "| Manuka Honey Choco       | 23736      | 60521659            | 2549              |\n",
+    "| Mint Chip Choco          | 25149      | 60016855            | 2386              |\n",
+    "| 99% Dark & Pure          | 24818      | 59596797            | 2401              |\n",
+    "| Almond Choco             | 20558      | 57781283            | 2810              |\n",
+    "| After Nines              | 25156      | 57301671            | 2277              |\n",
+    "| Drinking Coco            | 26402      | 56930678            | 2156              |\n",
+    "| Raspberry Choco          | 21672      | 56463233            | 2605              |\n",
+    "| Milk Bars                | 25436      | 56086861            | 2205              |\n",
+    "| Fruit & Nut Bars         | 23632      | 55320216            | 2340              |\n",
+    "| Baker's Choco Chips      | 21448      | 54549285            | 2543              |\n",
+    "| Orange Choco             | 23607      | 54511459            | 2309              |\n",
+    "| Choco Coated Almonds     | 19677      | 50620121            | 2572              |\n",
+    "| Caramel Stuffed Bars     | 26576      | 46122079            | 1735              |\n",
+    "| 70% Dark Bites           | 24524      | 42766381            | 1743              |\n"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "086f7013",
+   "metadata": {
+    "papermill": {
+     "duration": 0.006097,
+     "end_time": "2026-02-17T19:23:13.224209",
+     "exception": false,
+     "start_time": "2026-02-17T19:23:13.218112",
+     "status": "completed"
+    },
+    "tags": []
+   },
+   "source": [
+    "Measures products' revenue contributions, volume of shippings, average pricing, and potential key products to be explored.\n",
+    "\n",
+    "The two top-performes accounts for 11% of total revenue, showing no dominance or over-dependency. There's no indication of concentration in any perspective, suggesting stable performance, diversity of high-performing products, and success to reach target audiences."
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "4585473e",
+   "metadata": {
+    "papermill": {
+     "duration": 0.006689,
+     "end_time": "2026-02-17T19:23:13.237459",
+     "exception": false,
+     "start_time": "2026-02-17T19:23:13.230770",
+     "status": "completed"
+    },
+    "tags": []
+   },
+   "source": [
+    "## 5.5 Average Revenue per Transaction\n",
+    "Average transaction value across all records."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 11,
+   "id": "fc32395c",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2026-02-17T19:23:13.252266Z",
+     "iopub.status.busy": "2026-02-17T19:23:13.251908Z",
+     "iopub.status.idle": "2026-02-17T19:23:13.256491Z",
+     "shell.execute_reply": "2026-02-17T19:23:13.255511Z"
+    },
+    "papermill": {
+     "duration": 0.01462,
+     "end_time": "2026-02-17T19:23:13.258711",
+     "exception": false,
+     "start_time": "2026-02-17T19:23:13.244091",
+     "status": "completed"
+    },
+    "tags": []
+   },
+   "outputs": [],
+   "source": [
+    "query = \"\"\"SELECT AVG(\"Revenue per Box\") AS Average_per_Box\n",
+    "            FROM choco_sales;\n",
+    "        \"\"\""
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "c43df039",
+   "metadata": {
+    "papermill": {
+     "duration": 0.00629,
+     "end_time": "2026-02-17T19:23:13.271635",
+     "exception": false,
+     "start_time": "2026-02-17T19:23:13.265345",
+     "status": "completed"
+    },
+    "tags": []
+   },
+   "source": [
+    "| Average_per_Box |\n",
+    "| --- |\n",
+    "| 1113.40950639854 |"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "b0eea4d8",
+   "metadata": {
+    "papermill": {
+     "duration": 0.006584,
+     "end_time": "2026-02-17T19:23:13.284604",
+     "exception": false,
+     "start_time": "2026-02-17T19:23:13.278020",
+     "status": "completed"
+    },
+    "tags": []
+   },
+   "source": [
+    "Indicates overall purchasing behavior and sales consistency across time and conditions.\n",
+    "\n",
+    "The average price remains stable, ensuring the absence of extreme volatility."
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "e90c06a5",
+   "metadata": {
+    "papermill": {
+     "duration": 0.006655,
+     "end_time": "2026-02-17T19:23:13.297523",
+     "exception": false,
+     "start_time": "2026-02-17T19:23:13.290868",
+     "status": "completed"
+    },
+    "tags": []
+   },
+   "source": [
+    "## 5.6 Monthly Revenue\n",
+    "Volume of transactions in each month and total revenue in span time."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 12,
+   "id": "d8e641c5",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2026-02-17T19:23:13.313669Z",
+     "iopub.status.busy": "2026-02-17T19:23:13.312460Z",
+     "iopub.status.idle": "2026-02-17T19:23:13.318143Z",
+     "shell.execute_reply": "2026-02-17T19:23:13.316949Z"
+    },
+    "papermill": {
+     "duration": 0.01562,
+     "end_time": "2026-02-17T19:23:13.320059",
+     "exception": false,
+     "start_time": "2026-02-17T19:23:13.304439",
+     "status": "completed"
+    },
+    "tags": []
+   },
+   "outputs": [],
+   "source": [
+    "query = \"\"\"SELECT Month, SUM(\"Boxes Shipped\") AS Total_boxes, SUM(Amount) AS Revenue_per_Month,\n",
+    "           SUM(Amount)/SUM(\"Boxes Shipped\") AS Avg_price_per_box\n",
+    "           FROM choco_sales\n",
+    "           GROUP BY Month\n",
+    "\t\t   ORDER BY Revenue_per_Month DESC, Avg_price_per_box;\n",
+    "        \"\"\""
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "430700bb",
+   "metadata": {
+    "papermill": {
+     "duration": 0.0061,
+     "end_time": "2026-02-17T19:23:13.332512",
+     "exception": false,
+     "start_time": "2026-02-17T19:23:13.326412",
+     "status": "completed"
+    },
+    "tags": []
+   },
+   "source": [
+    "| Month | Total_boxes | Revenue_per_Month | Avg_price_per_box |\n",
+    "|-------|------------|-------------------|-------------------|\n",
+    "| 1     | 84162      | 189298173         | 2249              |\n",
+    "| 6     | 80357      | 181271250         | 2255              |\n",
+    "| 7     | 69808      | 170393846         | 2440              |\n",
+    "| 3     | 59633      | 159835390         | 2680              |\n",
+    "| 5     | 66662      | 159225336         | 2388              |\n",
+    "| 8     | 60682      | 149989744         | 2471              |\n",
+    "| 2     | 54917      | 149913303         | 2729              |\n",
+    "| 4     | 64216      | 143475368         | 2234              |"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "809cf528",
+   "metadata": {
+    "papermill": {
+     "duration": 0.006503,
+     "end_time": "2026-02-17T19:23:13.345088",
+     "exception": false,
+     "start_time": "2026-02-17T19:23:13.338585",
+     "status": "completed"
+    },
+    "tags": []
+   },
+   "source": [
+    "Main indicators of seasonality and audience behaviour.\n",
+    "\n",
+    "The two leading months are a generous surprise, and the closely following are to be expected given Easter holiday. No real concentration indicated. It's expected with such a classic product."
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "188dc4dc",
+   "metadata": {
+    "papermill": {
+     "duration": 0.00606,
+     "end_time": "2026-02-17T19:23:13.358362",
+     "exception": false,
+     "start_time": "2026-02-17T19:23:13.352302",
+     "status": "completed"
+    },
+    "tags": []
+   },
+   "source": [
+    "# 6 - Performance Analysis\n",
+    "## 6.1 Country Performance\n",
+    "**Australia** leads total revenue, representing approximately **18.6%** of overall sales. While it holds a clear first position, revenue distribution across the six countries remains relatively balanced, with no extreme market dependency observed. The **USA** and **UK** follow closely, forming a second performance tier alongside **Canada** and **India**.\n",
+    "\n",
+    "**New Zealand** ranks slightly lower; however, the difference between positions is not substantial, reinforcing the diversified nature of the revenue structure.\n",
+    "\n",
+    "When analyzing volume (**Boxes Shipped**) alongside average price per box, Australia’s leadership is primarily volume-driven. In contrast, the **USA** maintains competitive revenue despite lower shipment volume due to a higher average price per box. This indicates stronger pricing power or higher-value product mix.\n",
+    "\n",
+    "**Canada** presents a growth opportunity: shipment volume is relatively strong, and a moderate increase in average price could significantly improve total revenue without requiring demand expansion.\n",
+    "\n",
+    "## 6.2 Salesperson Performance\n",
+    "**Kelci Walkden** and **Brien Boise** are the top-performing sales representatives, generating the highest total revenue with minimal difference between them. **Madelene Upcott** follows closely, forming a strong leading group.\n",
+    "\n",
+    "Revenue distribution across the team is generally stable, with moderate gaps between mid-level performers. However, the two lowest-performing representatives display a more pronounced revenue gap, indicating potential performance inefficiencies or territory-related challenges.\n",
+    "\n",
+    "Volume analysis shows that Kelci Walkden’s leadership is supported by consistently high shipment numbers. B**everie Moffet** and **Karlen McCaffrey** demonstrate strong volume performance as well, suggesting potential for upward revenue mobility if average pricing improves.\n",
+    "\n",
+    "Conversely, **Madelene Upcott** and **Van Tuxwell** stand out due to higher average price per box, indicating strength in closing higher-margin transactions.\n",
+    "\n",
+    "This segmentation suggests two distinct sales strategies within the team:\n",
+    "\n",
+    "* Volume-driven performers\n",
+    "\n",
+    "* Margin-driven performers\n",
+    "\n",
+    "Balancing both approaches may optimize total team revenue.\n",
+    "\n",
+    "## 6.3 Product Performance\n",
+    "**Smooth Silky Salty** and **50% Dark Bites** are the top revenue-generating products, both significantly ahead of the third-ranked product. Together, they account for approximately **11%** of total revenue, which is notable given the overall balanced product distribution.\n",
+    "\n",
+    "**Smooth Silky Salty** achieves its leadership through a combination of high shipment volume and strong average price positioning. In contrast, **50% Dark Bites** relies heavily on volume, maintaining a competitive but more moderate average price.\n",
+    "\n",
+    "**Almond Choco** presents an interesting margin-driven opportunity. Despite lower shipment volume, it has the highest average price per box, indicating premium positioning.\n",
+    "\n",
+    "Conversely, **Caramel Stuffed Bars** exhibits strong volume but the lowest average price. This product may benefit from price optimization strategies, as even minor pricing adjustments could significantly impact total revenue.\n",
+    "\n",
+    "Overall, product performance reflects a mix of:\n",
+    "\n",
+    "* High-volume core products\n",
+    "\n",
+    "* Premium niche products\n",
+    "\n",
+    "* Volume-heavy low-margin items\n",
+    "\n",
+    "This diversified structure reduces product-level revenue concentration risk.\n",
+    "\n",
+    "## 6.4 Revenue Trends Over Time\n",
+    "**January** and **June** generate the highest monthly revenues, followed by **July**. Although these months lead in total revenue, the overall monthly distribution remains relatively balanced without extreme seasonal concentration.\n",
+    "\n",
+    "Revenue peaks in **January** and **June** are primarily volume-driven rather than price-driven, as these months exhibit some of the lowest average prices per box alongside the highest shipment volumes. This suggests demand expansion rather than premium pricing.\n",
+    "\n",
+    "**February** and **March** display the highest average prices, while shipment volume is comparatively lower. This indicates potential demand compression during higher pricing periods.\n",
+    "\n",
+    "While specific seasonal drivers cannot be confirmed without external data, the observed pattern suggests that volume-based growth periods outperform price-based strategies in this dataset."
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "d3502dba",
+   "metadata": {
+    "papermill": {
+     "duration": 0.00656,
+     "end_time": "2026-02-17T19:23:13.372369",
+     "exception": false,
+     "start_time": "2026-02-17T19:23:13.365809",
+     "status": "completed"
+    },
+    "tags": []
+   },
+   "source": [
+    "# 7. Key Insights\n",
+    "* **Australia** leads country performance, accounting for approximately **18.6%** of total revenue. Despite its leadership, revenue distribution across countries remains **relatively balanced**, indicating **diversified geographic** exposure.\n",
+    "* **Canada** demonstrates strong **growth potential**, combining high shipment volume with moderate pricing. Even small pricing optimizations could significantly increase its **revenue contribution**.\n",
+    "* **Kelci Walkden** and **Brien Boise** are the most consistent sales performers, balancing **shipment volume** and **pricing efficiency** to maintain top positions.\n",
+    "* **Madelene Upcott** and **Van Tuxwell** stand out for **margin-driven performance**, achieving high average revenue per box and demonstrating strength in **premium** or **high-value transactions**.\n",
+    "* **Beverie Moffet** and **Karlen McCaffrey** show strong **volume-driven performance**, indicating **operational efficiency** and **demand generation** capacity.\n",
+    "* Product leadership is driven by distinct strategies:\n",
+    "    * **Smooth Silky Salty** combines **high volume** with **strong pricing**.\n",
+    "    * **50% Dark Bites** achieves top performance primarily through exceptional **shipment volume**.\n",
+    "* Monthly revenue peaks in **January** and **June**, largely driven by higher **shipment volume** rather than pricing increases.\n",
+    "* **February** and **March** record the highest average prices, although this is accompanied by lower shipment volume. While seasonal effects may influence this pattern, further data would be required for confirmation."
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "3f1eba75",
+   "metadata": {
+    "papermill": {
+     "duration": 0.006612,
+     "end_time": "2026-02-17T19:23:13.385264",
+     "exception": false,
+     "start_time": "2026-02-17T19:23:13.378652",
+     "status": "completed"
+    },
+    "tags": []
+   },
+   "source": [
+    "# 8. Strategic Recommendations\n",
+    "## 8.1 Optimize Price in High-Volume Markets\n",
+    "Canada and other countries have a steady shippment performance. An experiment on prices, such as minor price increases on high-demand products, could increase revenue without requiring sudden physical expansion or demand growth.\n",
+    "\n",
+    "**Rationale:**\n",
+    "High volume with moderate pricing suggest a significant revenue expansion potential.\n",
+    "\n",
+    "## 8.2 Leverage Margin-Driven Sales Representatives\n",
+    "Sales representatives such as Madelene Upcott and Van Tuxwell show strong performance in higher average price transactions.\n",
+    "\n",
+    "**Recommendations:**\n",
+    "* Assign them premium/luxury lines of products.\n",
+    "* Involve them in high-value clients acquisiton strategies.\n",
+    "* Watch and replicate their personal strategies across the team.\n",
+    "\n",
+    "**Rationale:**\n",
+    "Margin optmization and right talent placement may present stronger profitability than pure volume increase.\n",
+    "\n",
+    "## 8.3 Review Underperforming Sales Positions\n",
+    "The lowest-performing sales representatives show noticeable revenue gaps compared to the team average.\n",
+    "\n",
+    "**Recommendations:**\n",
+    "* Provide personal coaching.\n",
+    "* Evaluate geographical location.\n",
+    "\n",
+    "**Rationale:**\n",
+    "Improving the table bottom performers can lead to significant revenue effect.\n",
+    "\n",
+    "## 8.4 Evaluate Product Pricing Strategy\n",
+    "Products such as Caramel Stuffed Bars show strong volume but low average price.\n",
+    "\n",
+    "**Recommendations:**\n",
+    "* Test moderate pricing changes.\n",
+    "* New lines maintaning the base flavour but exploring diverse additionals with higher price.\n",
+    "\n",
+    "**Rationale:**\n",
+    "Small margin increases on high-volume products can generate a substantial revenue rise.\n",
+    "\n",
+    "## 8.5 Analyze Seasonal Volume Patterns\n",
+    "January and June revenue peaks are driven by shipment volume.\n",
+    "\n",
+    "**Recommendations:**\n",
+    "* Prepare inventory scaling strategies during peak months.\n",
+    "* Launch targeted promotions during historically strong demand periods.\n",
+    "* Investigate demand drivers for these months.\n",
+    "\n",
+    "**Rationale:**\n",
+    "Understading volume peaks and seasonal changes can improve the operation flow and arrangements."
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "f4cfc0ee",
+   "metadata": {
+    "papermill": {
+     "duration": 0.00601,
+     "end_time": "2026-02-17T19:23:13.397446",
+     "exception": false,
+     "start_time": "2026-02-17T19:23:13.391436",
+     "status": "completed"
+    },
+    "tags": []
+   },
+   "source": [
+    "# 9. Limitations & Future Improvements\n",
+    "## 9.1 Dataset Scope\n",
+    "The dataset consists of a single transactional table and does not include cost data, profit margins, or operational expenses.\n",
+    "\n",
+    "**Impact:**\n",
+    "\n",
+    "While revenue performance could be analyzed, profitability and margin efficiency could not be evaluated. Revenue growth does not necessarily reflect profit growth.\n",
+    "## 9.2 Learning-Oriented Dataset Structure\n",
+    "As the dataset is designed for learning purposes, it presented minimal structural inconsistencies, spelling errors, formatting issues, or null values.\n",
+    "\n",
+    "**Impact:**\n",
+    "\n",
+    "Although this alleviated preprocessing steps, it also limited experience with real-world data quality challenges such as inconsistent encoding, missing values, or messy formatting normally found in operational datasets. This suggests that future projects should incorporate more complex or raw datasets to further develop data cleaning mastery.\n",
+    "## 9.3 Limited Temporal & Geographic Scope\n",
+    "The dataset covers a limited time period and six countries.\n",
+    "\n",
+    "**Impact:**\n",
+    "\n",
+    "This impacts the ability to perform deeper trend analysis, long-term planning, or regional behaviour studies. Broader time spanning and additional marked would strengthen data-based conclusions.\n",
+    "## 9.4 Absence of Customer-Level Data\n",
+    "No customer IDs or repeat purchase metrics were available.\n",
+    "\n",
+    "**Impact:**\n",
+    "\n",
+    "Customer retention, segmentation, and lifetime value analysis could not be proceeded.\n",
+    "## 9.5 Seasonal Interpretation Constraints\n",
+    "Monthly revenue patterns suggest possible seasonal effects; however, no external marketing, economic, or event data were available to empower such hypothesis.\n",
+    "\n",
+    "**Impact:**\n",
+    "\n",
+    "Seasonal interpretations remain observational guesses and could not be consolidated."
+   ]
+  }
+ ],
+ "metadata": {
+  "kaggle": {
+   "accelerator": "none",
+   "dataSources": [
+    {
+     "datasetId": 9191134,
+     "sourceId": 14391756,
+     "sourceType": "datasetVersion"
+    },
+    {
+     "datasetId": 9500139,
+     "sourceId": 14852653,
+     "sourceType": "datasetVersion"
+    }
+   ],
+   "dockerImageVersionId": 31259,
+   "isGpuEnabled": false,
+   "isInternetEnabled": true,
+   "language": "python",
+   "sourceType": "notebook"
+  },
+  "kernelspec": {
+   "display_name": "Python 3",
+   "language": "python",
+   "name": "python3"
+  },
+  "language_info": {
+   "codemirror_mode": {
+    "name": "ipython",
+    "version": 3
+   },
+   "file_extension": ".py",
+   "mimetype": "text/x-python",
+   "name": "python",
+   "nbconvert_exporter": "python",
+   "pygments_lexer": "ipython3",
+   "version": "3.12.12"
+  },
+  "papermill": {
+   "default_parameters": {},
+   "duration": 6.029396,
+   "end_time": "2026-02-17T19:23:13.924140",
+   "environment_variables": {},
+   "exception": null,
+   "input_path": "__notebook__.ipynb",
+   "output_path": "__notebook__.ipynb",
+   "parameters": {},
+   "start_time": "2026-02-17T19:23:07.894744",
+   "version": "2.6.0"
+  }
+ },
+ "nbformat": 4,
+ "nbformat_minor": 5
+}
