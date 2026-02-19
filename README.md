@@ -1,7 +1,7 @@
-# Overview
+# 🍫 Overview
 This project demonstrates a full analysis workflow applied to a multi-country transactional sales data. The objective was to validate, transform, analyze, and interpret revenue, boxes shipped, and average price to create information. Later organized into business insights and strategic recommendations.
 
-# Technical Workflow
+# 🛠️ Technical Workflow
 * Data validation and structural inspection (Excel & Pandas)
 * Data transformation and feature engineering (Pandas)
 * SQL-based aggregation and segmentation (SQL)
@@ -10,7 +10,7 @@ This project demonstrates a full analysis workflow applied to a multi-country tr
 * Strategic recommendations
 * Analytical limitations assessment
 
-# Skills demonstrated
+# 👨🏻‍💻 Skills demonstrated
 * Structured data validation and cleaning
 * Feature enginnering (datetime info extracted)
 * SQL-based aggregation (ORDER BY, GROUP BY)
@@ -19,7 +19,7 @@ This project demonstrates a full analysis workflow applied to a multi-country tr
 * Business-oriented communication
 * Reproducible notebook workflow
 
-# Visual Insights
+# 📊 Visual Insights
 ## Revenue by Country
 Australia leads revenue generation, though distribution remains relatively balanced across markets.
 ![Graphic Representation](https://github.com/josegoms/kaggle/blob/main/images/graphic2.png "Graphic Representation")
@@ -29,3 +29,22 @@ Performance segmentation reveals both volume-driven and margin-driven sales prof
 ## Monthly Revenue Trend
 Revenue peaks are primarily volume-driven rather than price-driven.
 ![Graphic Representation](https://github.com/josegoms/kaggle/blob/main/images/graphic3.png "Graphic Representation")
+
+# 🗂️ Project Structure
+```
+chocolate-sales-analysis/
+│
+├── data/
+│   └── choco_sales.csv
+│
+├── notebooks/
+│   └── Chocolate Sales - Performance Analysis.ipynb
+│
+├── images/
+│   └── graphic.png
+│   └─────── graphic2.png
+|   └──────────── graphic3.png
+|
+└── README.md
+
+```
