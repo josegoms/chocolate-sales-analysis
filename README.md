@@ -1,36 +1,73 @@
 # 🍫 Overview
-This project demonstrates a full analysis workflow applied to a multi-country transactional sales data. The objective was to validate, transform, analyze, and interpret revenue, boxes shipped, and average price to create information. Later organized into business insights and strategic recommendations.
+
+This project demonstrates a complete data analysis workflow applied to a multi-country transactional sales dataset. The objective was to validate, transform, analyze, and interpret key metrics such as revenue, boxes shipped, and average price to generate actionable insights.
+
+The results were consolidated into an interactive Power BI dashboard, enabling dynamic exploration of product positioning, salesperson performance, and geographic distribution.
+
+---
 
 # 🛠️ Technical Workflow
+
 * Data validation and structural inspection (Excel & Pandas)
 * Data transformation and feature engineering (Pandas)
 * SQL-based aggregation and segmentation (SQL)
 * KPI development (revenue by country, salesperson, month)
 * Performance analysis (country, salesperson, product, month)
+* Data visualization and dashboard development (Power BI)
 * Strategic recommendations
 * Analytical limitations assessment
 
-# 👨🏻‍💻 Skills demonstrated
+---
+
+# 👨🏻‍💻 Skills Demonstrated
+
 * Structured data validation and cleaning
-* Feature enginnering (datetime info extracted)
-* SQL-based aggregation (ORDER BY, GROUP BY)
+* Feature engineering (datetime extraction)
+* SQL-based aggregation (JOIN, GROUP BY, ORDER BY)
 * Revenue segmentation analysis
-* Volume and margin evaluations
+* Volume vs pricing performance evaluation
+* Data visualization and dashboard design (Power BI)
 * Business-oriented communication
 * Reproducible notebook workflow
 
-# 📊 Visual Insights
-## Revenue by Country
-Australia leads revenue generation, though distribution remains relatively balanced across markets.
-![Graphic Representation](https://github.com/josegoms/kaggle/blob/main/images/graphic2.png "Graphic Representation")
-## Salesperson Performance
-Performance segmentation reveals both volume-driven and margin-driven sales profiles.
-![Graphic Representation](https://github.com/josegoms/kaggle/blob/main/images/graphic.png "Graphic Representation")
-## Monthly Revenue Trend
-Revenue peaks are primarily volume-driven rather than price-driven.
-![Graphic Representation](https://github.com/josegoms/kaggle/blob/main/images/graphic3.png "Graphic Representation")
+---
+
+# 📊 Dashboard Pages
+
+## 📌 Overview Page
+
+Provides a high-level summary of revenue, volume, and performance indicators, allowing quick identification of overall trends and top contributors.
+
+![Overview Dashboard](images/dashboard_overview.png)
+
+---
+
+## 👥 Salesperson Analysis
+
+Highlights differences in sales strategies, identifying volume-driven, price-driven, and top-performing individuals through KPI comparison and scatter analysis.
+
+![Salesperson Dashboard](images/dashboard_salesperson.png)
+
+---
+
+## 📦 Product Analysis
+
+Shows product segmentation based on price and volume, distinguishing premium, volume, star, and low-performing products.
+
+![Product Dashboard](images/dashboard_products.png)
+
+---
+
+## 🌍 Geographic Analysis
+
+Displays revenue distribution across countries, supporting geographic comparison and market-level insights.
+
+![Map Dashboard](images/dashboard_map.png)
+
+---
 
 # 🗂️ Project Structure
+
 ```
 chocolate-sales-analysis/
 │
@@ -40,11 +77,14 @@ chocolate-sales-analysis/
 ├── notebooks/
 │   └── Chocolate Sales - Performance Analysis.ipynb
 │
+├── powerbi/
+│   └── chocolate_sales_dashboard.pbix
+│
 ├── images/
-│   └── graphic.png
-│   └─────── graphic2.png
-|   └──────────── graphic3.png
-|
+│   └── dashboard_overview.png
+│   └── dashboard_salesperson.png
+│   └── dashboard_products.png
+│   └── dashboard_map.png
+│
 └── README.md
-
 ```
