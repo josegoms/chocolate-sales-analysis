@@ -78,7 +78,7 @@ chocolate-sales-analysis/
 │   └── Chocolate Sales - Performance Analysis.ipynb
 │
 ├── powerbi/
-│   └── chocolate_sales_dashboard.pbix
+│   └── ChocolateSales_Report.pbix
 │
 ├── images/
 │   └── dashboard_overview.png
